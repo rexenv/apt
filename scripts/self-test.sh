@@ -7,10 +7,15 @@
 #   sudo ./scripts/self-test.sh site
 set -euo pipefail
 
-SITE="$(cd "${1:?usage: self-test.sh <site-dir>}" && pwd)"
+SRC="$(cd "${1:?usage: self-test.sh <site-dir>}" && pwd)"
 T="$(mktemp -d)"
 trap 'rm -rf "$T"' EXIT
 chmod 755 "$T"
+# A copy apt's own user can read: apt verifies signatures as `_apt`, and a site under a private
+# home (the runner's /home/runner is 0750) reads as NO_PUBKEY — its signed-by keyring unreadable.
+cp -R "$SRC" "$T/site"
+chmod -R a+rX "$T/site"
+SITE="$T/site"
 mkdir -p "$T/lists/partial" "$T/cache/archives/partial" "$T/sources.list.d" "$T/preferences.d"
 echo "deb [signed-by=${SITE}/rexenv.gpg] file://${SITE} stable main" > "$T/sources.list"
 
@@ -29,7 +34,7 @@ for arch in amd64 arm64; do
   mkdir -p "$T/lists/partial"
   # Any signature or hash problem is an error here, not a warning apt carries on past.
   apt-get "${apt_opts[@]}" -o APT::Update::Error-Mode=any update
-  newest="$(ls "$SITE/pool/main/r/rexenv" | sed -n "s/^rexenv_\\(.*\\)_${arch}\\.deb$/\\1/p" | sort -V | tail -1)"
+  newest="$(find "$SITE/pool/main/r/rexenv" -name "rexenv_*_${arch}.deb" -printf '%f\n' | sed -n "s/^rexenv_\\(.*\\)_${arch}\\.deb$/\\1/p" | sort -V | tail -1)"
   candidate="$(apt-cache "${apt_opts[@]}" policy rexenv | awk '/Candidate:/ {print $2}')"
   if [ "$candidate" != "$newest" ]; then
     echo "self-test: ${arch}: apt's candidate is '${candidate}', the pool's newest is '${newest}'" >&2
