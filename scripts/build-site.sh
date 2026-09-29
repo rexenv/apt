@@ -22,7 +22,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 EXPECTED_FPR="$(tr -d ' \n' < "$ROOT/KEY_FINGERPRINT")"
 POOL="$OUT/pool/main/r/rexenv"
 TMP="$(mktemp -d)"
-export GNUPGHOME="$(mktemp -d)"
+GNUPGHOME="$(mktemp -d)"
+export GNUPGHOME
 chmod 700 "$GNUPGHOME"
 trap 'rm -rf "$TMP" "$GNUPGHOME"' EXIT
 
@@ -91,4 +92,4 @@ gpg --batch --yes --default-key "$FPR" --armor --detach-sign -o dists/stable/Rel
 # ---------------------------------------------------------------- the published key + the page
 cp "$ROOT/rexenv.gpg" "$ROOT/rexenv.asc" "$ROOT/index.html" .
 touch .nojekyll
-echo "build-site: $(ls pool/main/r/rexenv | wc -l | tr -d ' ') deb(s) from ${kept} release(s), signed by ${FPR}"
+echo "build-site: $(find pool/main/r/rexenv -name '*.deb' | wc -l | tr -d ' ') deb(s) from ${kept} release(s), signed by ${FPR}"
