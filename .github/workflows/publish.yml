@@ -1,7 +1,7 @@
 # Publish the apt repository: rebuild the whole site from the newest published releases on
-# rexenv/homebrew-tap, sign it, prove the runner's own apt accepts it, deploy it to Pages.
+# rexenv/rexenv, sign it, prove the runner's own apt accepts it, deploy it to Pages.
 #
-# Run it after a release is PUBLISHED on the tap (a draft's assets are not public). The build job
+# Run it after a release is PUBLISHED on rexenv/rexenv (a draft's assets are not public). The build job
 # runs in the `apt-signing` environment — the only place the private key exists — and that
 # environment has a required reviewer: reading the key is a human approval GitHub logs, the same
 # rule the app-update descriptors keep in rexenv/runtimes.
@@ -31,7 +31,7 @@ jobs:
     environment: apt-signing
     steps:
       - uses: actions/checkout@v4
-      - name: Build the site from the tap's releases
+      - name: Build the site from rexenv/rexenv's releases
         env:
           GH_TOKEN: ${{ github.token }}
           APT_SIGNING_KEY: ${{ secrets.APT_SIGNING_KEY }}

@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Build the signed apt repository for rexenv from the newest published releases on the tap.
+# Build the signed apt repository for rexenv from the newest published releases on rexenv/rexenv.
 #
 #   APT_SIGNING_KEY=<armored private key> ./scripts/build-site.sh site
 #
 # The site is DERIVED, never accumulated: every run downloads the debs of the newest KEEP
-# published (not draft, not prerelease) releases of rexenv/homebrew-tap, checks each against its
+# published (not draft, not prerelease) releases of rexenv/rexenv (on the tap until 30 Sep 2026;
+# 0.8.8–0.8.10 are mirrored there), checks each against its
 # .sha256 and its own control fields, builds the indexes with apt-ftparchive and signs Release —
 # so nothing binary is ever committed here, and a re-run rebuilds everything from the releases.
 #
@@ -15,7 +16,7 @@ set -euo pipefail
 
 OUT="${1:?usage: build-site.sh <out-dir>}"
 KEEP="${KEEP:-3}"
-TAP="${TAP:-rexenv/homebrew-tap}"
+TAP="${TAP:-rexenv/rexenv}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 : "${APT_SIGNING_KEY:?APT_SIGNING_KEY (the armored private key) is not set}"
 
